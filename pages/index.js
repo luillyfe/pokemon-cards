@@ -13,8 +13,8 @@ export async function getStaticProps() {
             id,
             name,
             url: species.url,
-            img: sprites.front_default,
-            type: types[0].type.name
+            type: types[0].type.name,
+            sprites
         }))
 
     return {
