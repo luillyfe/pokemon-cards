@@ -1,4 +1,4 @@
-import React, {useState, useMemo} from 'react';
+import React, {useState, useMemo, useEffect} from 'react';
 
 // https://via.placeholder.com/80x50
 const Pokemon = ({name, url, sprites, type}) => {
@@ -6,14 +6,25 @@ const Pokemon = ({name, url, sprites, type}) => {
     const iterator = useMemo(() => getIterableFrom(sprites), [sprites])
     const [src, setSrc] = useState(getDefaultSprite(sprites))
 
-    function handleClick() {
+    function nextSprite() {
         const newSrc = iterator.next().value
         setSrc(newSrc)
     }
 
+    let intervalId;
+    function startSlider() {
+        intervalId = setInterval(() => {
+            nextSprite()
+        }, 2000)
+    }
+
+    useEffect(() => {
+        return () => clearInterval(intervalId)
+    }, [])
+
     return (
         <div className="card mt-2" style={{width: "18rem"}}>
-            <img src={src} className="card-img-top" alt={name} onClick={handleClick}/>
+            <img src={src} className="card-img-top" alt={name} onClick={nextSprite}/>
             <div className="card-body">
                 <h5 className="card-title">{name}</h5>
                 <p className="card-text">Some quick example text to build on the card title and make up the bulk of
