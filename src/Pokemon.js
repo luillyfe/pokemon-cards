@@ -1,40 +1,48 @@
-import React, {useState, useMemo, useEffect} from 'react';
+import React, {useState, useMemo, useEffect, useRef} from 'react';
+import styles from './Pokemon.module.css'
 
 // https://via.placeholder.com/80x50
 const Pokemon = ({name, url, sprites, type}) => {
     // Get an new Iterator when the sprites Obj changes.
     const iterator = useMemo(() => getIterableFrom(sprites), [sprites])
     const [src, setSrc] = useState(getDefaultSprite(sprites))
+    const imageRef = useRef(null)
 
-    function nextSprite() {
+    let timeoutId;
+    function nextSprite(event) {
         const newSrc = iterator.next().value
-        setSrc(newSrc)
+        event.target.classList.toggle(styles.clicked)
+        timeoutId = setTimeout(() => {
+            setSrc(newSrc)
+            event.target.classList.toggle(styles.clicked)
+        }, 300)
     }
 
     let intervalId;
     function startSlider() {
         intervalId = setInterval(() => {
-            nextSprite()
+            nextSprite({ target: imageRef.current })
         }, 2000)
     }
 
     useEffect(() => {
-        return () => clearInterval(intervalId)
+        return () => {
+            intervalId && clearInterval(intervalId)
+            timeoutId && clearTimeout(timeoutId)
+        }
     }, [])
 
     return (
         <div className="card mt-2" style={{width: "18rem"}}>
-            <img src={src} className="card-img-top" alt={name} onClick={nextSprite}/>
+            <img src={src} ref={imageRef} className={`card-img-top ${styles.card}`} alt={name} onClick={nextSprite}/>
             <div className="card-body">
                 <h5 className="card-title">{name}</h5>
                 <p className="card-text">Some quick example text to build on the card title and make up the bulk of
                     the card's content.</p>
-                {/*<a href="#" className="btn btn-primary">{type}</a>*/}
+                <a href={`pokemon/${url.match(/(\d+)(?!.*\d)/g)}`}>{type}</a>
             </div>
             <div className="card-footer">
-                <a /*href={`pokemon/${url.match(/(\d+)(?!.*\d)/g)}`}*/
-                    onClick={startSlider}
-                   className="btn btn-primary">Details</a>
+                <a onClick={startSlider} className="btn btn-primary">Start slider</a>
             </div>
         </div>
     );
